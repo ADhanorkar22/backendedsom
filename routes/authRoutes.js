@@ -9,11 +9,14 @@ const {
   createUser,
   getAllUsersForAdmin,
   getUserById,
+  getUserById1,
   getAllCpForAdmin,
   getAllSdForAdmin,
   getAllMdForAdmin,
   getAllDForAdmin,
   getAllRForAdmin,
+  getUserTransactions,
+  getUserTransactionsWithParent
 } = require("../models/dbOperations");
 
 // Route for user registration
@@ -41,11 +44,16 @@ router.post("/register", async (req, res) => {
       city,
       alternateNumber,
       pancardNumber,
+      commissionSurcharge,
+      percentage
     } = req.body;
+    console.log(req.body)
 
     const token = req.headers.authorization; // Token sent directly without "Bearer " prefix
+    console.log(token);
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     const parentId = decodedToken.userId;
+    console.log(parentId)
 
     // Check if user already exists with the provided email
     const existingUser = await getUserByEmail(email);
@@ -78,7 +86,9 @@ router.post("/register", async (req, res) => {
       state,
       city,
       alternateNumber,
-      pancardNumber
+      pancardNumber,
+      commissionSurcharge,
+      percentage
     );
 
     res.status(201).json({ message: "User registered successfully" });
@@ -96,6 +106,7 @@ router.post("/signin", async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+    
 
     // Compare password with hashed password in the database
     const validPassword = await bcrypt.compare(password, user.password);
@@ -114,6 +125,112 @@ router.post("/signin", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+router.get("/fetch-hierarchical-data", async (req, res) => {
+  console.log("here")
+  try {
+   // const { user_id } = req.query;
+    const token = req.headers.authorization; // Token sent directly without "Bearer " prefix
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decodedToken.userId;
+    console.log(userId);
+    // Check if the user is an Admin
+    const users = await getUserById1(userId);
+    // if (user.user_type !== "Admin") {
+    //   return res.status(403).json({
+    //     message:
+    //       "Unauthorized access. Only Admin users are permitted to use this functionality.",
+    //   });
+    // }
+
+    // Get all users for Admin
+    //const users = await getAllUsersForAdmin();
+
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+router.get("/my-transactions",async (req, res) => {
+  try {
+    //const userId = req.params.userId;
+      console.log("jnhdsiu");
+    //const { utype } = "Channel_Partner";
+
+    const token = req.headers.authorization; // Token sent directly without "Bearer " prefix
+
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decodedToken.userId;
+
+
+
+    const user = await getUserTransactions(userId);
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+//////////////////////WITHtRANSACTION////////////////////////////////////////////////////////////////////////////////////////////////
+
+router.get("/transactionsWithParent",async (req, res) => {
+  try {
+    //const userId = req.params.userId;
+      console.log("jnhdsiu");
+    //const { utype } = "Channel_Partner";
+
+    const token = req.headers.authorization; // Token sent directly without "Bearer " prefix
+
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decodedToken.userId;
+
+
+
+    const user = await  getUserTransactionsWithParent(userId);
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Route to get all users for Admin
 router.get("/adminusers", async (req, res) => {

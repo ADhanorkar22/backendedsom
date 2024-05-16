@@ -43,15 +43,15 @@ router.get("/balance", verifyToken, async (req, res) => {
 });
 
 // GET USERS UNDER THE SIGNED IN USER BY USING USERTYPE
-router.get("/underme/:utype", verifyToken, async (req, res) => {
+router.get("/underme", async (req, res) => {
   try {
-    const userId = req.userId;
-    const { utype } = req.params;
+    //const userId = req.userId;
+    //const { utype } = "Channel_Partner";
     const user = await getUsersUnderUser(userId, utype);
     res.json({
       message: "Protected route accessed successfully",
-      userId,
-      user,
+     // userId,
+      //user,
     });
   } catch (error) {
     console.error(error);
@@ -129,8 +129,12 @@ router.post("/transfer", verifyToken, async (req, res) => {
 router.get("/adminalltransactions", getAllTransactions);
 
 // GET ALL TRANSACTIONS FOR SIGNED IN USER ONLY
-router.get("/my-transactions", verifyToken, getUserTransactions);
+//router.get("/my-transactions", getUserTransactions);
+///////
 
+
+
+////////
 // API endpoint to get users under the signed-in user
 router.get("/users-under-me", verifyToken, getUsersUnderSignedInUser);
 

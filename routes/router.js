@@ -175,7 +175,7 @@ router.post("/create/retailer", verifyToken, retailerController.createRecord);
 router.get("/get/retailer/:id", verifyToken, retailerController.getRecordById);
 router.get("/get/retailer", verifyToken, retailerController.getAllRecords);
 router.put(
-  "/update/retailer/:id",
+  "/update:id",
   verifyToken,
   retailerController.updateRecordById
 );

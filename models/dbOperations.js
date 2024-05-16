@@ -166,7 +166,9 @@ async function createUser(
   state,
   city,
   alternateNumber,
-  pancardNumber
+  pancardNumber,
+  commissionSurcharge,
+  percentage
 ) {
   try {
     let userIdPrefix = "";
@@ -196,7 +198,7 @@ async function createUser(
     const hashedPassword = await bcrypt.hash(password, 10);
     // const [result] = await db.execute(
     const [result] = await pool.query(
-      "INSERT INTO users (user_id, name, email, password, user_type, parent_id, category, middle_name, last_name, mobile_number, outlet_name, aadharcard_number, gstin, date_of_birth, bank_account_number, ifsc, address, pincode, district, state, city, alternate_number, pancard_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO users (user_id, name, email, password, user_type, parent_id, category, middle_name, last_name, mobile_number, outlet_name, aadharcard_number, gstin, date_of_birth, bank_account_number, ifsc, address, pincode, district, state, city, alternate_number, pancard_number,commissionSurcharge, percentage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)",
       [
         userId,
         name,
@@ -221,6 +223,8 @@ async function createUser(
         city,
         alternateNumber,
         pancardNumber,
+        parseFloat(commissionSurcharge) ,
+       parseFloat(percentage)
       ]
     );
     return result.insertId;
@@ -240,6 +244,61 @@ async function getUserById(userId) {
     throw new Error(`Error getting user by ID: ${error.message}`);
   }
 }
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+async function getUserById1(userId) {
+
+  const query = `
+  WITH RECURSIVE HierarchicalCTE AS (
+    SELECT *
+    FROM
+      users
+    WHERE
+      user_id = ?
+    UNION ALL
+    SELECT
+      u.*
+    
+    FROM
+      users u
+    INNER JOIN
+      HierarchicalCTE h ON h.user_id = u.parent_id
+  )
+  SELECT *
+  FROM
+    HierarchicalCTE;
+`;
+
+  try {
+    // const [rows] = await db.execute('SELECT * FROM users WHERE user_id = ?', [userId]);
+    const [rows] = await pool.query(query,[
+      userId,
+    ]);
+    return rows;
+  } catch (error) {
+    throw new Error(`Error getting user by ID: ${error.message}`);
+  }
+}
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 async function getUsersUnderUser(userId, user_Type) {
   try {
@@ -341,19 +400,38 @@ async function getAllTransactions(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
-async function getUserTransactions(req, res) {
+async function getUserTransactions(userId) {
   try {
-    const userId = req.userId;
+   // console.log("njsijsn");
+   // const userId = req.userId;
+    console.log(userId);
     const [rows] = await pool.query(
       "SELECT * FROM transactions WHERE sender_id = ? OR receiver_id = ?",
       [userId, userId]
     );
-    res.json(rows);
+    return(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
+////////////////////////////traction of parent///////////////////////////////////////////////////////////////////////
+async function getUserTransactionsWithParent(userId) {
+  try {
+    const [rows] = await pool.query(
+      "SELECT * FROM transactions WHERE receiver_id=? AND sender_id IN (SELECT sender_id FROM transactions WHERE receiver_id=?)",
+      [userId, userId] // Provide the same value twice for the placeholder
+    );
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Internal server error");
+  }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 async function getUsersUnderSignedInUser(req, res) {
   try {
@@ -420,6 +498,7 @@ async function calculateSurcharge(amount) {
 // }
 
 module.exports = {
+  getUserById1,
   getUserByEmail,
   createUser,
   getUserById,
@@ -439,4 +518,5 @@ module.exports = {
   checkIfReceiverUnderSender,
   deleteUserById,
   calculateSurcharge,
+  getUserTransactionsWithParent
 };
