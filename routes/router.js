@@ -161,14 +161,17 @@ router.delete(
 router.post("/create/provider", verifyToken, providerController.createRecord);
 router.get("/get/provider/:id", verifyToken, providerController.getRecordById);
 router.get("/get/provider", verifyToken, providerController.getAllRecords);
+
 router.put(
-  "/update/provider/:id",
-  verifyToken,
+  "/update/user/:id",
+ // verifyToken,
   providerController.updateRecordById
 );
+
+
 router.delete(
-  "/delete/provider/:id",
-  verifyToken,
+  "/delete/user/:id",
+  //verifyToken,
   providerController.deleteRecordById
 );
 router.post("/create/retailer", verifyToken, retailerController.createRecord);

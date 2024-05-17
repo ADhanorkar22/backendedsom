@@ -118,88 +118,38 @@ const Provider = {
   },
 
   updateRecordById: (recordId, newData, callback) => {
+    console.log("id "+recordId)
     const {
       name,
-      middle_name,
-      last_name,
       mobile_number,
-      email,
-      outlet_name,
-      aadharcard_number,
-      gstin,
       date_of_birth,
-      remark,
-      bank_account_number,
-      ifsc,
-      main_min_balance,
-      low_balance_alert_limit,
       address,
-      pin_code,
-      district,
-      state,
+      pincode,
       city,
-      alternate_number,
-      pancard_number,
-      voter_id_number,
-      aeps_unsettled_fund
     } = newData;
-
+  
     const sql = `
-      UPDATE Provider
+      UPDATE users
       SET 
         name = ?,
-        middle_name = ?,
-        last_name = ?,
         mobile_number = ?,
-        email = ?,
-        outlet_name = ?,
-        aadharcard_number = ?,
-        gstin = ?,
         date_of_birth = ?,
-        remark = ?,
-        bank_account_number = ?,
-        ifsc = ?,
-        main_min_balance = ?,
-        low_balance_alert_limit = ?,
         address = ?,
-        pin_code = ?,
-        district = ?,
-        state = ?,
-        city = ?,
-        alternate_number = ?,
-        pancard_number = ?,
-        voter_id_number = ?,
-        aeps_unsettled_fund = ?
-      WHERE id = ?
+        pincode = ?,
+        city = ?
+      WHERE user_id = ?
     `;
-
+  
     const values = [
       name,
-      middle_name,
-      last_name,
       mobile_number,
-      email,
-      outlet_name,
-      aadharcard_number,
-      gstin,
       date_of_birth,
-      remark,
-      bank_account_number,
-      ifsc,
-      main_min_balance,
-      low_balance_alert_limit,
       address,
-      pin_code,
-      district,
-      state,
+      pincode,
       city,
-      alternate_number,
-      pancard_number,
-      voter_id_number,
-      aeps_unsettled_fund,
       recordId
     ];
-
+  
     pool.query(sql, values, (err, result) => {
       if (err) {
         return callback(err);
@@ -209,7 +159,7 @@ const Provider = {
   },
 
   deleteRecordById: (recordId, callback) => {
-    const sql = `DELETE FROM Provider WHERE id = ?`;
+    const sql = `DELETE FROM users WHERE id = ?`;
     const values = [recordId];
 
     pool.query(sql, values, (err, result) => {

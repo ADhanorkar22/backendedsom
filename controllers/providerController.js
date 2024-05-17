@@ -37,17 +37,25 @@ const providerController = {
   },
 
   updateRecordById: (req, res) => {
+
+    console.log("here")
     const { id } = req.params;
     const newData = req.body;
     Provider.updateRecordById(id, newData, (err, success) => {
+      console.log(err+"test1")
+      console.log(success+"test2")
       if (err) {
+        
         console.error('Error updating record:', err);
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error'});
       }
+      
       if (!success) {
         return res.status(404).json({ error: 'Record not found' });
+      }if(success){
+        res.json({ message: 'Record updated successfully' });
       }
-      res.json({ message: 'Record updated successfully' });
+      
     });
   },
 

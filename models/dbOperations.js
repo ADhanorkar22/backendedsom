@@ -244,38 +244,26 @@ async function getUserById(userId) {
     throw new Error(`Error getting user by ID: ${error.message}`);
   }
 }
-
-
-
+ 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 async function getUserById1(userId) {
-
   const query = `
-  WITH RECURSIVE HierarchicalCTE AS (
+    WITH RECURSIVE HierarchicalCTE AS (
+      SELECT *
+      FROM users
+      WHERE user_id = ?
+      UNION ALL
+      SELECT u.*
+      FROM users u
+      INNER JOIN HierarchicalCTE h ON h.user_id = u.parent_id
+    )
     SELECT *
-    FROM
-      users
-    WHERE
-      user_id = ?
-    UNION ALL
-    SELECT
-      u.*
-    
-    FROM
-      users u
-    INNER JOIN
-      HierarchicalCTE h ON h.user_id = u.parent_id
-  )
-  SELECT *
-  FROM
-    HierarchicalCTE;
-`;
+    FROM HierarchicalCTE
+    WHERE user_id != ?;  
+  `;
 
   try {
-    // const [rows] = await db.execute('SELECT * FROM users WHERE user_id = ?', [userId]);
-    const [rows] = await pool.query(query,[
-      userId,
-    ]);
+    const [rows] = await pool.query(query, [userId, userId]);  // Pass userId twice for the parameterized query
     return rows;
   } catch (error) {
     throw new Error(`Error getting user by ID: ${error.message}`);
@@ -283,21 +271,7 @@ async function getUserById1(userId) {
 }
 
 
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 async function getUsersUnderUser(userId, user_Type) {

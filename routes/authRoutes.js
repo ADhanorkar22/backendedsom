@@ -4,6 +4,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const providerController = require("../controllers/providerController");
 const {
   getUserByEmail,
   createUser,
@@ -15,8 +16,7 @@ const {
   getAllMdForAdmin,
   getAllDForAdmin,
   getAllRForAdmin,
-  getUserTransactions,
-  getUserTransactionsWithParent
+  getUserTransactions
 } = require("../models/dbOperations");
 
 // Route for user registration
@@ -187,33 +187,7 @@ router.get("/my-transactions",async (req, res) => {
 
 //////////////////////WITHtRANSACTION////////////////////////////////////////////////////////////////////////////////////////////////
 
-router.get("/transactionsWithParent",async (req, res) => {
-  try {
-    //const userId = req.params.userId;
-      console.log("jnhdsiu");
-    //const { utype } = "Channel_Partner";
 
-    const token = req.headers.authorization; // Token sent directly without "Bearer " prefix
-
-
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decodedToken.userId;
-
-
-
-    const user = await  getUserTransactionsWithParent(userId);
-    res.json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -258,6 +232,17 @@ router.get("/adminusers", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+///////////////////////////////////////////
+
+router.put(
+  "/update/provider:id",
+  //verifyToken,
+  providerController.updateRecordById
+);
+
+
+
+
 
 // Route to get all Channel Partners from the whole database
 router.get("/admincps", async (req, res) => {
